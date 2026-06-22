@@ -1,5 +1,4 @@
-# This workflow will build a Java project with Maven
-name: Java CI with Maven in Linux
+name: Java CI with Maven on Linux
 
 on:
   push:
@@ -7,19 +6,12 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         java: [ 17, 21 ]
-        # excludes JDK 21 on macOS and Windows
-        exclude:
-          - os: macos-latest
-            java: 21
-          - os: windows-latest
-            java: 21
 
-    name: Build with Java ${{ matrix.java }} on ${{ matrix.os }}
+    name: Build with Java ${{ matrix.java }} on Linux
 
     steps:
       - uses: actions/checkout@v4
