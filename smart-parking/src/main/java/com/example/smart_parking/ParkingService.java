@@ -15,6 +15,9 @@ public class ParkingService {
         if (slot == null) {
             return false;
         }
+        if (slot.isOccupied()) {
+            return false;
+        }
         slot.setOccupied(true);
         parkingEventLogger.log(slotId, "OCCUPIED");
         return true;
