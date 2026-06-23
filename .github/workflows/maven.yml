@@ -30,11 +30,13 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml', '**/*.yml') }}
           restore-keys: ${{ runner.os }}-m2-
       - name: Build with Maven
-        run: mvn -f smart-parking/pom.xml clean verify ${{ matrix.additional-maven-args }}
+        run: mvn verify ${{ matrix.additional-maven-args }}
+        working-directory: smart-parking
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
       - name: Generate JUnit Report
-        run: mvn -f smart-parking/pom.xml surefire-report:report-only
+        run: mvn surefire-report:report-only
+        working-directory: smart-parking
         if: ${{ always() }}
       - name: Archive JUnit Report
         uses: actions/upload-artifact@v4
