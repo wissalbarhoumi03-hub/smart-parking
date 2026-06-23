@@ -7,11 +7,13 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      workdir: smart-parking
     strategy:
       matrix:
         include:
           - java: 17
-            additional-maven-args: "-Pjacoco coveralls:report"
+            additional-maven-args: "-Pcoveralls"
           - java: 21
 
     name: Build with Java ${{ matrix.java }} on Linux
@@ -31,12 +33,12 @@ jobs:
           restore-keys: ${{ runner.os }}-m2-
       - name: Build with Maven
         run: mvn verify ${{ matrix.additional-maven-args }}
-        working-directory: smart-parking
+        working-directory: ${{ env.workdir }}
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
       - name: Generate JUnit Report
         run: mvn surefire-report:report-only
-        working-directory: smart-parking
+        working-directory: ${{ env.workdir }}
         if: ${{ always() }}
       - name: Archive JUnit Report
         uses: actions/upload-artifact@v4
