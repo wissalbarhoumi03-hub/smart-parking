@@ -15,7 +15,7 @@
     <!-- Change the Java compilation level to 11 -->
     
     <junit.version>4.13.2</junit.version>
-    <mockito.version>4.11.0</mockito.version>
+    <mockito.version>5.23.0</mockito.version>
     <assertj.version>3.27.3</assertj.version>
     
 </properties>
