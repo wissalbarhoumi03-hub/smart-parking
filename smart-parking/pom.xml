@@ -42,6 +42,26 @@
     <scope>test</scope>
 </dependency>
 
+
+<dependency>
+    <groupId>org.mongodb</groupId>
+    <artifactId>mongo-java-driver</artifactId>
+    <version>3.12.14</version>
+</dependency>
+<dependency>
+    <!-- required to see Mongo Java Driver logs -->
+    <groupId>ch.qos.logback</groupId>
+    <artifactId>logback-classic</artifactId>
+    <version>1.2.13</version>
+</dependency>
+
+<dependency>
+    <groupId>de.bwaldvogel</groupId>
+    <artifactId>mongo-java-server</artifactId>
+    <version>1.11.1</version>
+    <scope>test</scope>
+</dependency>
+
 </dependencies>
 
 <build>
