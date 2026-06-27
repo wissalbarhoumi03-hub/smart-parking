@@ -11,20 +11,20 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
-import org.testcontainers.containers.GenericContainer;
+
 
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 
+import org.testcontainers.containers.MongoDBContainer;
+
 public class ParkingSlotMongoRepositoryTestcontainersIT {
 
-    @SuppressWarnings("rawtypes")
-    @ClassRule
-    public static final GenericContainer mongo =
-        new GenericContainer("mongo:5")
-            .withExposedPorts(27017);
+	@ClassRule
+	public static final MongoDBContainer mongo =
+	    new MongoDBContainer("mongo:5");
 
     private MongoClient client;
     private ParkingSlotMongoRepository parkingSlotRepository;
@@ -32,10 +32,10 @@ public class ParkingSlotMongoRepositoryTestcontainersIT {
 
     @Before
     public void setup() {
-        client = new MongoClient(
-            new ServerAddress(
-                mongo.getHost(),
-                mongo.getMappedPort(27017)));
+    	client = new MongoClient(
+    		    new ServerAddress(
+    		        mongo.getHost(),
+    		        mongo.getMappedPort(27017)));
         parkingSlotRepository = new ParkingSlotMongoRepository(client);
         MongoDatabase database = client.getDatabase(
             ParkingSlotMongoRepository.PARKING_DB_NAME);
