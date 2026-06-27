@@ -34,7 +34,7 @@ jobs:
           echo "ADDITIONAL_MAVEN_OPTIONS=-Pcoveralls" >> $GITHUB_ENV
         if: ${{ env.COVERALLS_REPO_TOKEN && matrix.java == 17 }}
       - name: Build with Maven
-        run: mvn verify $ADDITIONAL_MAVEN_OPTIONS -Pdocker
+        run: mvn verify $ADDITIONAL_MAVEN_OPTIONS
         working-directory: ${{ env.workdir }}
       - name: Generate JUnit Report
         run: mvn surefire-report:report-only
