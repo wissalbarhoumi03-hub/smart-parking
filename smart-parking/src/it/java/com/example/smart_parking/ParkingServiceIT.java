@@ -15,6 +15,9 @@ public class ParkingServiceIT {
 
     @Mock
     private ParkingEventLogger eventLogger;
+    
+    @Mock
+    private ParkingSlotView parkingSlotView;
 
     private ParkingSlotRepository repository;
     private ParkingService service;
@@ -32,7 +35,7 @@ public class ParkingServiceIT {
         for (ParkingSlot slot : repository.findAll()) {
             repository.delete(slot.getId());
         }
-        service = new ParkingService(repository, eventLogger);
+        service = new ParkingService(repository, eventLogger, parkingSlotView );
     }
 
     @After

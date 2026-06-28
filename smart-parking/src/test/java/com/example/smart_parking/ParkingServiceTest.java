@@ -17,6 +17,10 @@ public class ParkingServiceTest {
 
     @Mock
     private ParkingEventLogger parkingEventLogger;
+    
+    @Mock
+    private ParkingSlotView parkingSlotView;
+
 
     @InjectMocks
     private ParkingService parkingService;
@@ -74,6 +78,14 @@ public class ParkingServiceTest {
             .isInstanceOf(RuntimeException.class);
 
         verify(slot).setOccupied(true);
+    }
+    
+    @Test
+    public void testAddSlotWhenSlotDoesNotAlreadyExist() {
+        ParkingSlot slot = new ParkingSlot("1");
+        when(parkingSlotRepository.findById("1")).thenReturn(null);
+        parkingService.addSlot(slot);
+        verify(parkingSlotRepository).save(slot);
     }
 
 }

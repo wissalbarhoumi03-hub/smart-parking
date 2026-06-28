@@ -1,21 +1,25 @@
 package com.example.smart_parking;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+
+import java.util.Arrays;
+
+import javax.swing.DefaultListModel;
+
+import org.assertj.swing.annotation.GUITest;
+import org.assertj.swing.core.matcher.JButtonMatcher;
+import org.assertj.swing.core.matcher.JLabelMatcher;
 import org.assertj.swing.edt.GuiActionRunner;
 import org.assertj.swing.fixture.FrameFixture;
+import org.assertj.swing.fixture.JButtonFixture;
+import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.junit.runner.GUITestRunner;
 import org.assertj.swing.junit.testcase.AssertJSwingJUnitTestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import org.assertj.swing.core.matcher.JButtonMatcher;
-import org.assertj.swing.core.matcher.JLabelMatcher;
-import org.assertj.swing.junit.runner.GUITestRunner;
-import org.assertj.swing.annotation.GUITest;
-import org.assertj.swing.fixture.JTextComponentFixture;
-import org.assertj.swing.fixture.JButtonFixture;
-import java.util.Arrays;
-import static org.assertj.core.api.Assertions.assertThat;
-import javax.swing.DefaultListModel;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(GUITestRunner.class)
 public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
@@ -23,21 +27,33 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
     private FrameFixture window;
     private ParkingSlotSwingView parkingSlotSwingView;
 
+    @Mock
+    private ParkingService parkingService;
+
+    private AutoCloseable closeable;
+
     @Override
     protected void onSetUp() {
+        closeable = MockitoAnnotations.openMocks(this);
         GuiActionRunner.execute(() -> {
             parkingSlotSwingView = new ParkingSlotSwingView();
+            parkingSlotSwingView.setParkingService(parkingService);
             return parkingSlotSwingView;
         });
         window = new FrameFixture(robot(), parkingSlotSwingView);
         window.show();
     }
 
+    @Override
+    protected void onTearDown() throws Exception {
+        closeable.close();
+    }
+
     @Test
     public void test() {
         // just to check the setup works
     }
-    
+
     @Test @GUITest
     public void testControlsInitialStates() {
         window.label(JLabelMatcher.withText("id"));
@@ -49,14 +65,14 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
         window.button(JButtonMatcher.withText("Mark Occupied")).requireDisabled();
         window.label("errorMessageLabel").requireText(" ");
     }
-    
+
     @Test
     public void testWhenIdAndNameAreNonEmptyThenAddButtonShouldBeEnabled() {
         window.textBox("idTextBox").enterText("1");
         window.textBox("nameTextBox").enterText("test");
         window.button(JButtonMatcher.withText("Add")).requireEnabled();
     }
-    
+
     @Test
     public void testWhenEitherIdOrNameAreBlankThenAddButtonShouldBeDisabled() {
         JTextComponentFixture idTextBox = window.textBox("idTextBox");
@@ -73,7 +89,7 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
         nameTextBox.enterText("test");
         window.button(JButtonMatcher.withText("Add")).requireDisabled();
     }
-    
+
     @Test
     public void testMarkOccupiedButtonShouldBeEnabledOnlyWhenASlotIsSelected() {
         GuiActionRunner.execute(() ->
@@ -87,7 +103,7 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
             parkingSlotSwingView.getListSlots().clearSelection());
         markOccupiedButton.requireDisabled();
     }
-    
+
     @Test
     public void testShowAllSlotsShouldAddSlotDescriptionsToTheList() {
         ParkingSlot slot1 = new ParkingSlot("1");
@@ -99,7 +115,7 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
         assertThat(listContents)
             .containsExactly(slot1.toString(), slot2.toString());
     }
-    
+
     @Test
     public void testShowErrorShouldShowTheMessageInTheErrorLabel() {
         ParkingSlot slot = new ParkingSlot("1");
@@ -109,7 +125,7 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
         window.label("errorMessageLabel")
             .requireText("error message: " + slot);
     }
-    
+
     @Test
     public void testSlotAddedShouldAddTheSlotToTheListAndResetTheErrorLabel() {
         ParkingSlot slot = new ParkingSlot("1");
@@ -120,10 +136,9 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
         assertThat(listContents).containsExactly(slot.toString());
         window.label("errorMessageLabel").requireText(" ");
     }
-    
+
     @Test
     public void testSlotRemovedShouldRemoveTheSlotFromTheListAndResetTheErrorLabel() {
-        // setup
         ParkingSlot slot1 = new ParkingSlot("1");
         ParkingSlot slot2 = new ParkingSlot("2");
         GuiActionRunner.execute(() -> {
@@ -132,15 +147,33 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
             listSlotsModel.addElement(slot1);
             listSlotsModel.addElement(slot2);
         });
-        // execute
         GuiActionRunner.execute(
             () -> parkingSlotSwingView.slotRemoved(new ParkingSlot("1"))
         );
-        // verify
         String[] listContents = window.list().contents();
         assertThat(listContents).containsExactly(slot2.toString());
         window.label("errorMessageLabel").requireText(" ");
     }
     
+    @Test
+    public void testAddButtonShouldDelegateToParkingServiceAddSlot() {
+        window.textBox("idTextBox").enterText("1");
+        window.textBox("nameTextBox").enterText("test");
+        window.button(JButtonMatcher.withText("Add")).click();
+        verify(parkingService).addSlot(new ParkingSlot("1"));
+    }
     
+    @Test
+    public void testMarkOccupiedButtonShouldDelegateToParkingServiceMarkAsOccupied() {
+        ParkingSlot slot1 = new ParkingSlot("1");
+        ParkingSlot slot2 = new ParkingSlot("2");
+        GuiActionRunner.execute(() -> {
+            parkingSlotSwingView.getListSlotsModel().addElement(slot1);
+            parkingSlotSwingView.getListSlotsModel().addElement(slot2);
+        });
+        GuiActionRunner.execute(() ->
+            parkingSlotSwingView.getListSlots().setSelectedIndex(1));
+        window.button(JButtonMatcher.withText("Mark Occupied")).click();
+        verify(parkingService).markAsOccupied(slot2.getId());
+    }
 }

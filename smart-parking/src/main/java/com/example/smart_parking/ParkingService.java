@@ -1,13 +1,26 @@
 package com.example.smart_parking;
-
 public class ParkingService {
 
     private ParkingSlotRepository parkingSlotRepository;
     private ParkingEventLogger parkingEventLogger;
+    private ParkingSlotView parkingSlotView;
 
-    public ParkingService(ParkingSlotRepository parkingSlotRepository, ParkingEventLogger parkingEventLogger) {
+    public ParkingService(ParkingSlotRepository parkingSlotRepository, 
+                          ParkingEventLogger parkingEventLogger,
+                          ParkingSlotView parkingSlotView) {
         this.parkingSlotRepository = parkingSlotRepository;
         this.parkingEventLogger = parkingEventLogger;
+        this.parkingSlotView = parkingSlotView;
+    }
+
+    public void addSlot(ParkingSlot slot) {
+        ParkingSlot existingSlot = parkingSlotRepository.findById(slot.getId());
+        if (existingSlot != null) {
+            parkingSlotView.showError("Already existing slot with id " + slot.getId(), existingSlot);
+            return;
+        }
+        parkingSlotRepository.save(slot);
+        parkingSlotView.slotAdded(slot);
     }
 
     public boolean markAsOccupied(String slotId) {
@@ -22,5 +35,4 @@ public class ParkingService {
         parkingEventLogger.log(slotId, "OCCUPIED");
         return true;
     }
-
 }

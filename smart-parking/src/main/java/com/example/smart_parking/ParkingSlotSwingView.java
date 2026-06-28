@@ -31,6 +31,12 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
     private DefaultListModel<ParkingSlot> listSlotsModel;
     private JButton btnMarkOccupied;
     private JLabel lblErrorMessage;
+    
+    private ParkingService parkingService;
+
+    public void setParkingService(ParkingService parkingService) {
+        this.parkingService = parkingService;
+    }
 
     DefaultListModel<ParkingSlot> getListSlotsModel() {
         return listSlotsModel;
@@ -122,6 +128,9 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
         gbc_btnAdd.gridx = 2;
         gbc_btnAdd.gridy = 2;
         contentPane.add(btnAdd, gbc_btnAdd);
+        btnAdd.addActionListener(
+        	    e -> parkingService.addSlot(new ParkingSlot(txtId.getText()))
+        	);
 
         listSlotsModel = new DefaultListModel<>();
         listSlots = new JList<>(listSlotsModel);
@@ -141,6 +150,10 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
         gbc_btnMarkOccupied.gridx = 2;
         gbc_btnMarkOccupied.gridy = 4;
         contentPane.add(btnMarkOccupied, gbc_btnMarkOccupied);
+        
+        btnMarkOccupied.addActionListener(
+        	    e -> parkingService.markAsOccupied(listSlots.getSelectedValue().getId())
+        	);
 
         listSlots.addListSelectionListener(new ListSelectionListener() {
             @Override
