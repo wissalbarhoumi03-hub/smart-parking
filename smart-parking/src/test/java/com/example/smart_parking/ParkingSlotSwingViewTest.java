@@ -13,6 +13,9 @@ import org.assertj.swing.junit.runner.GUITestRunner;
 import org.assertj.swing.annotation.GUITest;
 import org.assertj.swing.fixture.JTextComponentFixture;
 import org.assertj.swing.fixture.JButtonFixture;
+import java.util.Arrays;
+import static org.assertj.core.api.Assertions.assertThat;
+import javax.swing.DefaultListModel;
 
 @RunWith(GUITestRunner.class)
 public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
@@ -83,6 +86,60 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
         GuiActionRunner.execute(() ->
             parkingSlotSwingView.getListSlots().clearSelection());
         markOccupiedButton.requireDisabled();
+    }
+    
+    @Test
+    public void testShowAllSlotsShouldAddSlotDescriptionsToTheList() {
+        ParkingSlot slot1 = new ParkingSlot("1");
+        ParkingSlot slot2 = new ParkingSlot("2");
+        GuiActionRunner.execute(() ->
+            parkingSlotSwingView.showAllSlots(Arrays.asList(slot1, slot2))
+        );
+        String[] listContents = window.list().contents();
+        assertThat(listContents)
+            .containsExactly(slot1.toString(), slot2.toString());
+    }
+    
+    @Test
+    public void testShowErrorShouldShowTheMessageInTheErrorLabel() {
+        ParkingSlot slot = new ParkingSlot("1");
+        GuiActionRunner.execute(
+            () -> parkingSlotSwingView.showError("error message", slot)
+        );
+        window.label("errorMessageLabel")
+            .requireText("error message: " + slot);
+    }
+    
+    @Test
+    public void testSlotAddedShouldAddTheSlotToTheListAndResetTheErrorLabel() {
+        ParkingSlot slot = new ParkingSlot("1");
+        GuiActionRunner.execute(
+            () -> parkingSlotSwingView.slotAdded(new ParkingSlot("1"))
+        );
+        String[] listContents = window.list().contents();
+        assertThat(listContents).containsExactly(slot.toString());
+        window.label("errorMessageLabel").requireText(" ");
+    }
+    
+    @Test
+    public void testSlotRemovedShouldRemoveTheSlotFromTheListAndResetTheErrorLabel() {
+        // setup
+        ParkingSlot slot1 = new ParkingSlot("1");
+        ParkingSlot slot2 = new ParkingSlot("2");
+        GuiActionRunner.execute(() -> {
+            DefaultListModel<ParkingSlot> listSlotsModel =
+                parkingSlotSwingView.getListSlotsModel();
+            listSlotsModel.addElement(slot1);
+            listSlotsModel.addElement(slot2);
+        });
+        // execute
+        GuiActionRunner.execute(
+            () -> parkingSlotSwingView.slotRemoved(new ParkingSlot("1"))
+        );
+        // verify
+        String[] listContents = window.list().contents();
+        assertThat(listContents).containsExactly(slot2.toString());
+        window.label("errorMessageLabel").requireText(" ");
     }
     
     

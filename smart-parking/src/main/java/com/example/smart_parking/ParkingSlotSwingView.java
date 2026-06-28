@@ -30,6 +30,7 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
     private JList<ParkingSlot> listSlots;
     private DefaultListModel<ParkingSlot> listSlotsModel;
     private JButton btnMarkOccupied;
+    private JLabel lblErrorMessage;
 
     DefaultListModel<ParkingSlot> getListSlotsModel() {
         return listSlotsModel;
@@ -148,7 +149,7 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
             }
         });
         
-        JLabel lblErrorMessage = new JLabel(" ");
+        lblErrorMessage = new JLabel(" ");
         lblErrorMessage.setName("errorMessageLabel");
         GridBagConstraints gbc_lblErrorMessage = new GridBagConstraints();
         gbc_lblErrorMessage.insets = new Insets(0, 0, 0, 5);
@@ -159,21 +160,28 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
 
     @Override
     public void showAllSlots(List<ParkingSlot> slots) {
-        // TODO Auto-generated method stub
+    	slots.stream().forEach(listSlotsModel::addElement);
     }
 
     @Override
     public void showError(String message, ParkingSlot slot) {
-        // TODO Auto-generated method stub
+    	lblErrorMessage.setText(message + ": " + slot);
     }
 
     @Override
     public void slotAdded(ParkingSlot slot) {
-        // TODO Auto-generated method stub
+    	listSlotsModel.addElement(slot);
+        resetErrorLabel();
     }
+
+    private void resetErrorLabel() {
+        lblErrorMessage.setText(" ");
+    }
+    
 
     @Override
     public void slotRemoved(ParkingSlot slot) {
-        // TODO Auto-generated method stub
+    	listSlotsModel.removeElement(slot);
+        resetErrorLabel();
     }
 }
