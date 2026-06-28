@@ -22,6 +22,10 @@ public class ParkingService {
         parkingSlotRepository.save(slot);
         parkingSlotView.slotAdded(slot);
     }
+    
+    public void allSlots() {
+        parkingSlotView.showAllSlots(parkingSlotRepository.findAll());
+    }
 
     public boolean markAsOccupied(String slotId) {
         ParkingSlot slot = parkingSlotRepository.findById(slotId);
@@ -33,6 +37,7 @@ public class ParkingService {
         }
         slot.setOccupied(true);
         parkingEventLogger.log(slotId, "OCCUPIED");
+        parkingSlotView.slotRemoved(slot);
         return true;
     }
 }
