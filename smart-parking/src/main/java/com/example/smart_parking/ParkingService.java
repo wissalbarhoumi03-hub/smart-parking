@@ -37,6 +37,7 @@ public class ParkingService {
         }
         slot.setOccupied(true);
         parkingEventLogger.log(slotId, "OCCUPIED");
+        parkingSlotRepository.delete(slotId);
         parkingSlotView.slotRemoved(slot);
         return true;
     }
