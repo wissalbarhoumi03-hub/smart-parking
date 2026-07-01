@@ -23,6 +23,13 @@ public class ParkingSlotMongoRepository implements ParkingSlotRepository {
             .getDatabase(PARKING_DB_NAME)
             .getCollection(SLOT_COLLECTION_NAME);
     }
+    
+    public ParkingSlotMongoRepository(MongoClient client,
+            String databaseName, String collectionName) {
+        slotCollection = client
+            .getDatabase(databaseName)
+            .getCollection(collectionName);
+    }
 
     @Override
     public List<ParkingSlot> findAll() {

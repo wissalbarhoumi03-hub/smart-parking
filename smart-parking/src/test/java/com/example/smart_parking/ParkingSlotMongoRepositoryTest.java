@@ -46,7 +46,9 @@ public class ParkingSlotMongoRepositoryTest {
     @Before
     public void setUp() throws Exception {
         client = new MongoClient(new ServerAddress(serverAddress));
-        parkingSlotRepository = new ParkingSlotMongoRepository(client);
+        parkingSlotRepository = new ParkingSlotMongoRepository(client,
+        	    ParkingSlotMongoRepository.PARKING_DB_NAME,
+        	    ParkingSlotMongoRepository.SLOT_COLLECTION_NAME);
         MongoDatabase database = client.getDatabase(
             ParkingSlotMongoRepository.PARKING_DB_NAME);
         // make sure we always start with a clean database
