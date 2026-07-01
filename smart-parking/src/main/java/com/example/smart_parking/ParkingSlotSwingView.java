@@ -19,6 +19,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.SwingUtilities;
 
 public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
 
@@ -129,7 +130,9 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
         gbc_btnAdd.gridy = 2;
         contentPane.add(btnAdd, gbc_btnAdd);
         btnAdd.addActionListener(
-        	    e -> parkingService.addSlot(new ParkingSlot(txtId.getText()))
+        	    e -> new Thread(() ->
+        	        parkingService.addSlot(new ParkingSlot(txtId.getText()))
+        	    ).start()
         	);
 
         listSlotsModel = new DefaultListModel<>();
@@ -152,7 +155,9 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
         contentPane.add(btnMarkOccupied, gbc_btnMarkOccupied);
         
         btnMarkOccupied.addActionListener(
-        	    e -> parkingService.markAsOccupied(listSlots.getSelectedValue().getId())
+        	    e -> new Thread(() ->
+        	        parkingService.markAsOccupied(listSlots.getSelectedValue().getId())
+        	    ).start()
         	);
 
         listSlots.addListSelectionListener(new ListSelectionListener() {
@@ -178,13 +183,17 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
 
     @Override
     public void showError(String message, ParkingSlot slot) {
-    	lblErrorMessage.setText(message + ": " + slot);
+        SwingUtilities.invokeLater(() ->
+            lblErrorMessage.setText(message + ": " + slot)
+        );
     }
 
     @Override
     public void slotAdded(ParkingSlot slot) {
-    	listSlotsModel.addElement(slot);
-        resetErrorLabel();
+        SwingUtilities.invokeLater(() -> {
+            listSlotsModel.addElement(slot);
+            resetErrorLabel();
+        });
     }
 
     private void resetErrorLabel() {
@@ -194,7 +203,11 @@ public class ParkingSlotSwingView extends JFrame implements ParkingSlotView {
 
     @Override
     public void slotRemoved(ParkingSlot slot) {
-    	listSlotsModel.removeElement(slot);
-        resetErrorLabel();
+        SwingUtilities.invokeLater(() -> {
+            listSlotsModel.removeElement(slot);
+            resetErrorLabel();
+        });
     }
+    
+    
 }

@@ -13,7 +13,7 @@ public class ParkingService {
         this.parkingSlotView = parkingSlotView;
     }
 
-    public void addSlot(ParkingSlot slot) {
+    public synchronized void addSlot(ParkingSlot slot) {
         ParkingSlot existingSlot = parkingSlotRepository.findById(slot.getId());
         if (existingSlot != null) {
             parkingSlotView.showError("Already existing slot with id " + slot.getId(), existingSlot);
@@ -27,7 +27,7 @@ public class ParkingService {
         parkingSlotView.showAllSlots(parkingSlotRepository.findAll());
     }
 
-    public boolean markAsOccupied(String slotId) {
+    public synchronized boolean markAsOccupied(String slotId) {
         ParkingSlot slot = parkingSlotRepository.findById(slotId);
         if (slot == null) {
             return false;

@@ -20,12 +20,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import static org.mockito.Mockito.timeout;
 
 @RunWith(GUITestRunner.class)
 public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
 
     private FrameFixture window;
     private ParkingSlotSwingView parkingSlotSwingView;
+    private static final int TIMEOUT = 5000;
 
     @Mock
     private ParkingService parkingService;
@@ -119,9 +121,7 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testShowErrorShouldShowTheMessageInTheErrorLabel() {
         ParkingSlot slot = new ParkingSlot("1");
-        GuiActionRunner.execute(
-            () -> parkingSlotSwingView.showError("error message", slot)
-        );
+        parkingSlotSwingView.showError("error message", slot);
         window.label("errorMessageLabel")
             .requireText("error message: " + slot);
     }
@@ -129,9 +129,7 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
     @Test
     public void testSlotAddedShouldAddTheSlotToTheListAndResetTheErrorLabel() {
         ParkingSlot slot = new ParkingSlot("1");
-        GuiActionRunner.execute(
-            () -> parkingSlotSwingView.slotAdded(new ParkingSlot("1"))
-        );
+        parkingSlotSwingView.slotAdded(new ParkingSlot("1"));
         String[] listContents = window.list().contents();
         assertThat(listContents).containsExactly(slot.toString());
         window.label("errorMessageLabel").requireText(" ");
@@ -147,9 +145,7 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
             listSlotsModel.addElement(slot1);
             listSlotsModel.addElement(slot2);
         });
-        GuiActionRunner.execute(
-            () -> parkingSlotSwingView.slotRemoved(new ParkingSlot("1"))
-        );
+        parkingSlotSwingView.slotRemoved(new ParkingSlot("1"));
         String[] listContents = window.list().contents();
         assertThat(listContents).containsExactly(slot2.toString());
         window.label("errorMessageLabel").requireText(" ");
@@ -160,7 +156,8 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
         window.textBox("idTextBox").enterText("1");
         window.textBox("nameTextBox").enterText("test");
         window.button(JButtonMatcher.withText("Add")).click();
-        verify(parkingService).addSlot(new ParkingSlot("1"));
+        verify(parkingService, timeout(TIMEOUT))
+            .addSlot(new ParkingSlot("1"));
     }
     
     @Test
@@ -174,6 +171,7 @@ public class ParkingSlotSwingViewTest extends AssertJSwingJUnitTestCase {
         GuiActionRunner.execute(() ->
             parkingSlotSwingView.getListSlots().setSelectedIndex(1));
         window.button(JButtonMatcher.withText("Mark Occupied")).click();
-        verify(parkingService).markAsOccupied(slot2.getId());
+        verify(parkingService, timeout(TIMEOUT))
+            .markAsOccupied(slot2.getId());
     }
 }

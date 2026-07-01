@@ -15,6 +15,9 @@ import org.testcontainers.containers.MongoDBContainer;
 import com.mongodb.MongoClient;
 import com.mongodb.ServerAddress;
 
+import static org.awaitility.Awaitility.await;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 @RunWith(GUITestRunner.class)
 public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
 
@@ -60,8 +63,10 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
         window.textBox("idTextBox").enterText("1");
         window.textBox("nameTextBox").enterText("test");
         window.button(JButtonMatcher.withText("Add")).click();
-        assertThat(parkingSlotRepository.findById("1"))
-            .isEqualTo(new ParkingSlot("1"));
+        await().atMost(5, SECONDS).untilAsserted(() ->
+            assertThat(parkingSlotRepository.findById("1"))
+                .isEqualTo(new ParkingSlot("1"))
+        );
     }
 
     @Test
@@ -70,9 +75,11 @@ public class ModelViewControllerIT extends AssertJSwingJUnitTestCase {
         GuiActionRunner.execute(
             () -> parkingService.allSlots());
         GuiActionRunner.execute(() ->
-        parkingSlotSwingView.getListSlots().setSelectedIndex(0));
+            parkingSlotSwingView.getListSlots().setSelectedIndex(0));
         window.button(JButtonMatcher.withText("Mark Occupied")).click();
-        assertThat(parkingSlotRepository.findById("99"))
-            .isNull();
+        await().atMost(5, SECONDS).untilAsserted(() ->
+            assertThat(parkingSlotRepository.findById("99"))
+                .isNull()
+        );
     }
 }

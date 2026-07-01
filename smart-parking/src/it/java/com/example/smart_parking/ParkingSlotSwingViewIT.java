@@ -20,6 +20,12 @@ import com.mongodb.ServerAddress;
 import de.bwaldvogel.mongo.MongoServer;
 import de.bwaldvogel.mongo.backend.memory.MemoryBackend;
 
+import static org.assertj.swing.timing.Pause.pause;
+import static org.assertj.swing.timing.Timeout.timeout;
+import org.assertj.swing.timing.Condition;
+import static org.awaitility.Awaitility.await;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 @RunWith(GUITestRunner.class)
 public class ParkingSlotSwingViewIT extends AssertJSwingJUnitTestCase {
 
@@ -85,8 +91,10 @@ public class ParkingSlotSwingViewIT extends AssertJSwingJUnitTestCase {
         window.textBox("idTextBox").enterText("1");
         window.textBox("nameTextBox").enterText("test");
         window.button(JButtonMatcher.withText("Add")).click();
-        assertThat(window.list().contents())
-            .containsExactly(new ParkingSlot("1").toString());
+        await().atMost(5, SECONDS).untilAsserted(() ->
+            assertThat(window.list().contents())
+                .containsExactly(new ParkingSlot("1").toString())
+        );
     }
     
     @Test @org.assertj.swing.annotation.GUITest
@@ -95,6 +103,14 @@ public class ParkingSlotSwingViewIT extends AssertJSwingJUnitTestCase {
         window.textBox("idTextBox").enterText("1");
         window.textBox("nameTextBox").enterText("test");
         window.button(JButtonMatcher.withText("Add")).click();
+        pause(new Condition("Error label updated") {
+            @Override
+            public boolean test() {
+                return window.label("errorMessageLabel").text()
+                    .equals("Already existing slot with id 1: "
+                        + new ParkingSlot("1"));
+            }
+        }, timeout(5000));
         assertThat(window.list().contents()).isEmpty();
         window.label("errorMessageLabel")
             .requireText("Already existing slot with id 1: "
@@ -108,7 +124,9 @@ public class ParkingSlotSwingViewIT extends AssertJSwingJUnitTestCase {
         GuiActionRunner.execute(() ->
             parkingSlotSwingView.getListSlots().setSelectedIndex(0));
         window.button(JButtonMatcher.withText("Mark Occupied")).click();
-        assertThat(window.list().contents()).isEmpty();
+        await().atMost(5, SECONDS).untilAsserted(() ->
+            assertThat(window.list().contents()).isEmpty()
+        );
     }
     
     @Test @org.assertj.swing.annotation.GUITest
